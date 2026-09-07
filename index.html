@@ -102,6 +102,24 @@ body{margin:0;}
   max-width:520px;
   padding:0 5vw;
 }
+.hero-definition{
+  position:absolute;
+  top:100px;
+  right:5vw;
+  z-index:1;
+  max-width:230px;
+  text-align:right;
+  font-family:'IBM Plex Mono',monospace;
+  color:var(--muted);
+  pointer-events:none;
+}
+.hero-definition-head{font-size:11.5px;letter-spacing:0.02em;margin-bottom:0.4rem;}
+.hero-definition-head .word{font-style:italic;}
+.hero-definition-head .pos{text-transform:uppercase;font-size:9.5px;letter-spacing:0.06em;}
+.hero-definition-body{font-size:11px;line-height:1.6;}
+@media (max-width:900px){
+  .hero-definition{display:none;}
+}
 .eyebrow{
   font-family:'IBM Plex Mono',monospace;
   font-size:12px;
@@ -928,6 +946,10 @@ body.custom-cursor, body.custom-cursor a, body.custom-cursor button, body.custom
   <canvas id="heroShieldCanvas"></canvas>
   <canvas id="heroDotsCanvas"></canvas>
   <div class="hero-legibility-fade"></div>
+  <div class="hero-definition">
+    <div class="hero-definition-head"><span class="word">occlude</span> <span class="ipa">/əˈkluːd/</span> <span class="pos">verb</span></div>
+    <div class="hero-definition-body">to stop up, close, or block; to shut off from view or access.</div>
+  </div>
   <div class="content">
     <div>
       <p class="eyebrow">Zero-knowledge settlement</p>
