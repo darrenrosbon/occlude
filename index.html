@@ -429,6 +429,8 @@ p.lede{
   height:2px;
   background:linear-gradient(90deg,transparent,rgba(232,137,74,1),transparent);
   top:0;
+  transform:translateY(0px);
+  will-change:transform;
 }
 .scan-line::before{
   content:'';
@@ -1541,7 +1543,7 @@ tick();
   }
 
   function setFinalState(){
-    line.style.top = '100%';
+    line.style.transform = `translateY(${doc.clientHeight}px)`;
     rows.forEach(r => {
       const locked = r.dataset.locked === 'true';
       const bar = r.querySelector('.redact-bar');
@@ -1564,7 +1566,7 @@ tick();
     const crossed = new Set();
 
     line.style.transition = 'none';
-    line.style.top = '0px';
+    line.style.transform = 'translateY(0px)';
     rows.forEach(r => {
       const bar = r.querySelector('.redact-bar');
       if(bar){ bar.style.transition = 'none'; bar.style.width = '0%'; }
@@ -1580,7 +1582,7 @@ tick();
       const elapsed = ts - start;
       const prog = Math.min(elapsed / duration, 1);
       const y = prog * docH;
-      line.style.top = y + 'px';
+      line.style.transform = `translateY(${y}px)`;
 
       rows.forEach((r, i) => {
         if(crossed.has(i)) return;
