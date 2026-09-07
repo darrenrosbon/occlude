@@ -1104,7 +1104,8 @@ body.custom-cursor, body.custom-cursor a, body.custom-cursor button, body.custom
   const el = document.getElementById('heroShieldCanvas');
   const heroEl = document.querySelector('.hero');
   const renderer = new THREE.WebGLRenderer({canvas: el, antialias:true, alpha:true});
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  renderer.setPixelRatio(dpr);
 
   const scene = new THREE.Scene();
   const camera = new THREE.OrthographicCamera(-1,1,1,-1,0,1);
@@ -1215,9 +1216,13 @@ body.custom-cursor, body.custom-cursor a, body.custom-cursor button, body.custom
   function resize(){
     const w = heroEl.clientWidth, h = heroEl.clientHeight;
     renderer.setSize(w, h, false);
-    uniforms.uRes.value.set(w, h);
+    // gl_FragCoord in the shader is in physical (drawing-buffer) pixels, which
+    // is CSS pixels * devicePixelRatio once renderer.setPixelRatio() is set.
+    // uRes/uCenter must be in that same physical-pixel space, or the shield
+    // renders shrunk and mispositioned on any Retina/high-DPI display.
+    uniforms.uRes.value.set(w * dpr, h * dpr);
     const xFrac = w <= 640 ? 1.15 : 0.7;
-    uniforms.uCenter.value.set(w*xFrac, h*0.46);
+    uniforms.uCenter.value.set(w*xFrac*dpr, h*0.46*dpr);
   }
   window.addEventListener('resize', resize);
   resize();
