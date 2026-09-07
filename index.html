@@ -1213,7 +1213,21 @@ body.custom-cursor, body.custom-cursor a, body.custom-cursor button, body.custom
   }
   resize();
   seed();
-  window.addEventListener('resize', () => { resize(); seed(); });
+  let lastWidth = w;
+  window.addEventListener('resize', () => {
+    // Mobile browsers fire resize on address-bar show/hide during scroll, which
+    // only changes height, not width. Reseeding then makes the dots visibly
+    // jump/teleport while scrolling. Only reseed on a genuine width change.
+    const newWidth = heroEl.clientWidth;
+    if(newWidth === lastWidth){
+      w = canvas.width = newWidth;
+      h = canvas.height = heroEl.clientHeight;
+      return;
+    }
+    lastWidth = newWidth;
+    resize();
+    seed();
+  });
 
   function frame(){
     ctx.clearRect(0,0,w,h);
@@ -1661,7 +1675,18 @@ tick();
 
     resize();
     seed();
-    window.addEventListener('resize', () => { resize(); seed(); });
+    let lastWidth = w;
+    window.addEventListener('resize', () => {
+      const newWidth = section.clientWidth;
+      if(newWidth === lastWidth){
+        w = canvas.width = newWidth;
+        h = canvas.height = section.clientHeight;
+        return;
+      }
+      lastWidth = newWidth;
+      resize();
+      seed();
+    });
 
     let isVisible = false;
     let rafId = null;
