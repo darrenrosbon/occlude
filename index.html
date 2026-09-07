@@ -1091,8 +1091,30 @@ body.custom-cursor, body.custom-cursor a, body.custom-cursor button, body.custom
         float bump=noise(p*3.5+t*0.4)*0.08;
         return d+bump;
       }
+      float sdBox(vec3 p, vec3 b){
+        vec3 q=abs(p)-b;
+        return length(max(q,0.0))+min(max(q.x,max(q.y,q.z)),0.0);
+      }
+      vec3 rotY(vec3 p, float a){ float c=cos(a),s=sin(a); return vec3(p.x*c+p.z*s, p.y, -p.x*s+p.z*c); }
+      vec3 rotZ(vec3 p, float a){ float c=cos(a),s=sin(a); return vec3(p.x*c-p.y*s, p.x*s+p.y*c, p.z); }
+      float mapFrag(vec3 p, float t, float seed){
+        float orbit = t*0.5 + seed*6.2831;
+        float r = 0.45 + 0.15*sin(t*0.3+seed*3.0);
+        vec3 center = vec3(cos(orbit)*r, sin(orbit*1.3+seed)*r*0.6, sin(orbit)*r);
+        vec3 q = rotZ(rotY(p-center, t+seed*4.0), seed*2.0);
+        return sdBox(q, vec3(0.07,0.07,0.07));
+      }
+      float mapFrags(vec3 p, float t){
+        float d=1e5;
+        for(int i=0;i<6;i++){
+          float seed=float(i)/6.0;
+          d=min(d, mapFrag(p,t,seed));
+        }
+        return d;
+      }
       void main(){
         vec2 uv=(gl_FragCoord.xy-uCenter)/(uRes.y*uScale);
+        float t=uTime;
         vec3 ro=vec3(0.0,0.0,3.2);
         vec3 rd=normalize(vec3(uv,-1.4));
         float dist=0.0; float glow=0.0;
@@ -1105,6 +1127,17 @@ body.custom-cursor, body.custom-cursor a, body.custom-cursor button, body.custom
           dist+=d*0.6;
           if(dist>8.0) break;
         }
+
+        float fragGlow=0.0;
+        float dist2=0.0; vec3 posF=ro;
+        for(int i=0;i<40;i++){
+          posF=ro+rd*dist2;
+          float d=mapFrags(posF,t);
+          fragGlow+=exp(-abs(d)*8.0)*0.06;
+          dist2+=max(d*0.6,0.01);
+          if(dist2>4.0) break;
+        }
+
         vec3 amber=vec3(0.910,0.537,0.290);
         vec3 amberDim=vec3(0.788,0.435,0.219);
         vec3 col=vec3(0.0); float alpha=0.0;
@@ -1120,8 +1153,9 @@ body.custom-cursor, body.custom-cursor a, body.custom-cursor button, body.custom
           col=mix(amberDim*0.4, amber, diff*0.7+fres*0.6);
           alpha=1.0;
         }
+        col += vec3(1.0,0.8,0.55) * fragGlow;
         col+=amber*glow*0.5;
-        alpha=max(alpha, min(glow*1.2,1.0));
+        alpha=max(alpha, min(glow*1.2+fragGlow,1.0));
         gl_FragColor=vec4(col,alpha);
       }
     `
