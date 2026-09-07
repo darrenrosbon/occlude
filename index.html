@@ -361,7 +361,7 @@ p.lede{
   padding:7rem 5vw 8rem;
 }
 .security-inner{max-width:640px;margin:0 auto;position:relative;z-index:1;}
-.security-drift{position:absolute;inset:0;z-index:0;pointer-events:none;display:none;}
+.security-drift{position:absolute;inset:0;z-index:0;pointer-events:none;display:block;}
 .security-cmd{position:absolute;top:50%;width:5vw;transform:translateY(-50%);z-index:0;pointer-events:none;display:none;align-items:center;justify-content:center;}
 .security-cmd.left{left:0;}
 .security-cmd.right{right:0;}
@@ -369,7 +369,6 @@ p.lede{
 .security-cmd .cursor{display:inline-block;width:6px;height:11px;background:var(--amber);vertical-align:-1px;animation:cmdblink 1s step-end infinite;}
 @keyframes cmdblink{50%{opacity:0;}}
 @media (min-width:1024px){
-  .security-drift{display:block;}
   .security-cmd{display:flex;}
 }
 @media (prefers-reduced-motion: reduce){
@@ -531,7 +530,7 @@ p.lede{
 }
 .boot-handshake.show{opacity:1;}
 .boot-status{color:var(--muted);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.85rem;}
-.boot-bar{font-size:16px;color:var(--amber);letter-spacing:2px;}
+.boot-bar{font-size:16px;color:var(--amber);letter-spacing:2px;min-height:1.2em;}
 .boot-pct{color:var(--muted);font-size:11px;margin-top:0.65rem;}
 .boot.done{opacity:0;pointer-events:none;transition:opacity 0.5s ease;}
 @media (prefers-reduced-motion: reduce){
