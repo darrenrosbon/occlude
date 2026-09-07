@@ -224,6 +224,7 @@ p.lede{
 
 @media (prefers-reduced-motion: reduce){
   .brand-cursor{opacity:1 !important;}
+  .hero-word-cursor{opacity:1 !important;}
 }
 .hero::after{
   content:'';
@@ -930,7 +931,7 @@ body.custom-cursor, body.custom-cursor a, body.custom-cursor button, body.custom
   <div class="content">
     <div>
       <p class="eyebrow">Zero-knowledge settlement</p>
-      <h1>Your position.<br><span id="invisibleWord">Invisible</span><span class="hero-word-cursor" id="invisibleCursor"></span> <span style="white-space:nowrap;"><em>on</em><svg width="0.42em" height="0.42em" viewBox="0 0 24 24" style="vertical-align:0.02em;margin:0 4px;flex-shrink:0;transform:rotate(45deg);" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke="#E8894A" stroke-width="2.2"/><path d="M10.6 12.1l1.3 1.3" stroke="#7A4A2A" stroke-width="2.6"/><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke="#E8894A" stroke-width="2.2"/></svg><em>chain</em></span>.</h1>
+      <h1>Your position.<br><span id="invisibleWord">Invisible</span><span class="hero-word-cursor" id="invisibleCursor"></span><br><span style="white-space:nowrap;"><em>on</em><svg width="0.42em" height="0.42em" viewBox="0 0 24 24" style="vertical-align:0.02em;margin:0 4px;flex-shrink:0;transform:rotate(45deg);" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke="#E8894A" stroke-width="2.2"/><path d="M10.6 12.1l1.3 1.3" stroke="#7A4A2A" stroke-width="2.6"/><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke="#E8894A" stroke-width="2.2"/></svg><em>chain</em></span>.</h1>
       <div class="readout">
         <div><span class="k">routing</span> &nbsp; <span class="v">shielded pool</span></div>
         <div><span class="k">counterparty</span> &nbsp; <span class="v">not disclosed</span></div>
@@ -2135,7 +2136,6 @@ wordTick();
       j++;
       wordEl.textContent = to.slice(0, j);
       if(j < to.length){ setTimeout(type, 90); }
-      else { setTimeout(() => { clearInterval(blink); cursorEl.style.opacity = '0'; }, 900); }
     }
     del();
   }
