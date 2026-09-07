@@ -2046,47 +2046,62 @@ wordTick();
 
 <script>
 (function(){
-  const dot = document.getElementById('cursorDot');
-  const ring = document.getElementById('cursorRing');
-  if(!dot || !ring) return;
+  try {
+    const dot = document.getElementById('cursorDot');
+    const ring = document.getElementById('cursorRing');
+    if(!dot || !ring) return;
 
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-  if(prefersReducedMotion || !finePointer) return;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    if(prefersReducedMotion || !finePointer) return;
 
-  document.body.classList.add('custom-cursor');
+    // Only hide the native cursor once we've actually received a real mouse
+    // position, and only once the animation loop is confirmed running. This
+    // way a script error, or any gap before the first mousemove, never
+    // leaves the visitor with no visible cursor at all.
+    let mouseX = -100, mouseY = -100;
+    let ringX = -100, ringY = -100;
+    let started = false;
 
-  let mouseX = -100, mouseY = -100;
-  let ringX = -100, ringY = -100;
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      dot.style.transform = `translate(${mouseX}px, ${mouseY}px)`;
+      dot.classList.add('show');
+      ring.classList.add('show');
+      if(!started){
+        started = true;
+        document.body.classList.add('custom-cursor');
+      }
+    });
 
-  document.addEventListener('mousemove', (e) => {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
-    dot.style.transform = `translate(${mouseX}px, ${mouseY}px)`;
-    dot.classList.add('show');
-    ring.classList.add('show');
-  });
+    document.addEventListener('mouseleave', () => {
+      dot.classList.remove('show');
+      ring.classList.remove('show');
+    });
 
-  document.addEventListener('mouseleave', () => {
-    dot.classList.remove('show');
-    ring.classList.remove('show');
-  });
+    function frame(){
+      try {
+        ringX += (mouseX - ringX) * 0.18;
+        ringY += (mouseY - ringY) * 0.18;
+        ring.style.transform = `translate(${ringX}px, ${ringY}px)`;
+        requestAnimationFrame(frame);
+      } catch(err){
+        document.body.classList.remove('custom-cursor');
+      }
+    }
+    frame();
 
-  function frame(){
-    ringX += (mouseX - ringX) * 0.18;
-    ringY += (mouseY - ringY) * 0.18;
-    ring.style.transform = `translate(${ringX}px, ${ringY}px)`;
-    requestAnimationFrame(frame);
+    const HOVER_SELECTOR = 'a, button, input, .doc-row, .statcard, .status-tag';
+    document.addEventListener('mouseover', (e) => {
+      if(e.target.closest(HOVER_SELECTOR)) ring.classList.add('hover');
+    });
+    document.addEventListener('mouseout', (e) => {
+      if(e.target.closest(HOVER_SELECTOR)) ring.classList.remove('hover');
+    });
+  } catch(err){
+    document.body.classList.remove('custom-cursor');
   }
-  frame();
-
-  const HOVER_SELECTOR = 'a, button, input, .doc-row, .statcard, .status-tag';
-  document.addEventListener('mouseover', (e) => {
-    if(e.target.closest(HOVER_SELECTOR)) ring.classList.add('hover');
-  });
-  document.addEventListener('mouseout', (e) => {
-    if(e.target.closest(HOVER_SELECTOR)) ring.classList.remove('hover');
-  });
 })();
 </script>
 
