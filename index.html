@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Occlude</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 26'%3E%3Crect width='26' height='26' fill='%23000000'/%3E%3Ccircle cx='13' cy='13' r='10' fill='%23E8894A'/%3E%3Ccircle cx='20' cy='8' r='9' fill='%23000000'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' fill='%23000000'/%3E%3Cpath fill='%23E8894A' d='M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z'/%3E%3C/svg%3E">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
@@ -819,9 +819,8 @@ body.custom-cursor, body.custom-cursor a, body.custom-cursor button, body.custom
 
 <div class="boot" id="boot">
   <div class="boot-brand">
-    <svg class="boot-mark" id="bootMark" width="30" height="30" viewBox="0 0 26 26">
-      <circle cx="13" cy="13" r="10" fill="#E8894A"/>
-      <circle cx="20" cy="8" r="9" fill="#000000"/>
+    <svg class="boot-mark" id="bootMark" width="26" height="26" viewBox="0 0 24 24">
+      <path fill="#E8894A" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
     </svg>
     <span class="boot-word" id="bootWord"></span><span class="boot-cursor" id="bootCursor"></span>
   </div>
@@ -907,10 +906,10 @@ body.custom-cursor, body.custom-cursor a, body.custom-cursor button, body.custom
 
 <nav class="nav" id="top">
     <a class="brand" href="#top" aria-label="Occlude, back to top">
-      <svg class="brand-mark" width="26" height="26" viewBox="0 0 26 26">
-        <circle cx="13" cy="13" r="10" fill="#E8894A"/>
-        <circle cx="20" cy="8" r="9" fill="#000000"/>
+      <svg class="brand-mark" width="26" height="26" viewBox="0 0 24 24">
+        <path fill="#E8894A" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
       </svg>
+      <span class="brand-word" id="word"></span><span class="brand-cursor" id="cursor"></span>
     </a>
     <a class="btn nav-cta" href="#" id="navRequestAccessBtn"></a>
   </nav>
@@ -1037,7 +1036,7 @@ body.custom-cursor, body.custom-cursor a, body.custom-cursor button, body.custom
 <footer class="footer">
   <div class="footer-row">
     <a class="brand footer-brand" href="#top">
-      <svg width="20" height="20" viewBox="0 0 26 26"><circle cx="13" cy="13" r="10" fill="#E8894A"/><circle cx="20" cy="8" r="9" fill="#000000"/></svg>
+      <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#E8894A" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       <span class="brand-word">occlude</span>
     </a>
     <div class="footer-links">
@@ -1242,6 +1241,38 @@ body.custom-cursor, body.custom-cursor a, body.custom-cursor button, body.custom
   }
   frame();
 })();
+</script>
+<script>
+const full = "occlude";
+const wordEl = document.getElementById('word');
+const cursorEl = document.getElementById('cursor');
+const prefersReducedMotionWord = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+if(prefersReducedMotionWord){
+  wordEl.textContent = full;
+} else {
+
+let wordI = 0, wordMode = 'typing';
+const TYPE_MS = 130, HOLD_FULL_MS = 4500, HOLD_EMPTY_MS = 600, DELETE_MS = 130;
+setInterval(() => cursorEl.style.opacity = cursorEl.style.opacity === '0' ? '1' : '0', 500);
+function wordTick(){
+  if(wordMode === 'typing'){
+    wordI++; wordEl.textContent = full.slice(0, wordI);
+    if(wordI >= full.length){ wordMode = 'holdFull'; setTimeout(wordTick, HOLD_FULL_MS); return; }
+    setTimeout(wordTick, TYPE_MS);
+  } else if(wordMode === 'holdFull'){
+    wordMode = 'deleting'; setTimeout(wordTick, DELETE_MS);
+  } else if(wordMode === 'deleting'){
+    wordI--; wordEl.textContent = full.slice(0, wordI);
+    if(wordI <= 0){ wordMode = 'holdEmpty'; setTimeout(wordTick, HOLD_EMPTY_MS); return; }
+    setTimeout(wordTick, DELETE_MS);
+  } else if(wordMode === 'holdEmpty'){
+    wordMode = 'typing'; setTimeout(wordTick, TYPE_MS);
+  }
+}
+wordTick();
+
+}
 </script>
 <script>
 (function(){
