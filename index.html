@@ -10,18 +10,22 @@
 <meta property="og:url" content="https://darrenrosbon.github.io/occlude/">
 <meta property="og:title" content="Occlude — Zero-knowledge settlement">
 <meta property="og:description" content="Occlude routes trades through a zero-knowledge shielded pool. A concept site exploring what a privacy-preserving settlement protocol could look like.">
-<meta property="og:image" content="https://darrenrosbon.github.io/occlude/og-image.png">
+<meta property="og:image" content="https://darrenrosbon.github.io/occlude/og-image.png?v=2">
+<meta property="og:image:alt" content="Occlude: Your position. Invisible on-chain. A glowing amber shield sphere with orbiting fragments.">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Occlude — Zero-knowledge settlement">
 <meta name="twitter:description" content="Occlude routes trades through a zero-knowledge shielded pool. A concept site exploring what a privacy-preserving settlement protocol could look like.">
-<meta name="twitter:image" content="https://darrenrosbon.github.io/occlude/og-image.png">
+<meta name="twitter:image" content="https://darrenrosbon.github.io/occlude/og-image.png?v=2">
 
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' fill='%23000000'/%3E%3Cpath fill='%23E8894A' d='M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
 :root{
   --bg:#0B0A09;
@@ -1104,7 +1108,8 @@ body.custom-cursor, body.custom-cursor a, body.custom-cursor button, body.custom
   const el = document.getElementById('heroShieldCanvas');
   const heroEl = document.querySelector('.hero');
   const renderer = new THREE.WebGLRenderer({canvas: el, antialias:true, alpha:true});
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  // Raymarching cost scales with pixel count; the blob is soft, so 1.5x is visually indistinguishable from 2x.
+  const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
   renderer.setPixelRatio(dpr);
 
   const scene = new THREE.Scene();
@@ -1169,14 +1174,21 @@ body.custom-cursor, body.custom-cursor a, body.custom-cursor button, body.custom
         vec3 rd=normalize(vec3(uv,-1.4));
         float dist=0.0; float glow=0.0;
         vec3 pos=ro; bool hit=false;
-        for(int i=0;i<64;i++){
+        // Track closest approach so silhouette pixels get fractional coverage
+        // (analytic edge AA) instead of a hard hit/miss that reads as jagged.
+        float minD=1e5; vec3 posMin=ro;
+        for(int i=0;i<96;i++){
           pos=ro+rd*dist;
           float d=map(pos);
           glow+=exp(-abs(d)*3.0)*0.02;
+          if(d<minD){ minD=d; posMin=pos; }
           if(d<0.001){ hit=true; break; }
           dist+=d*0.6;
           if(dist>8.0) break;
         }
+        float pxW=3.0/(uRes.y*uScale);
+        float cov=hit?1.0:(1.0-smoothstep(0.0,pxW,minD));
+        if(!hit && cov>0.0) pos=posMin;
 
         float fragGlow=0.0;
         float dist2=0.0; vec3 posF=ro;
@@ -1191,7 +1203,7 @@ body.custom-cursor, body.custom-cursor a, body.custom-cursor button, body.custom
         vec3 amber=vec3(0.910,0.537,0.290);
         vec3 amberDim=vec3(0.788,0.435,0.219);
         vec3 col=vec3(0.0); float alpha=0.0;
-        if(hit){
+        if(hit || cov>0.0){
           vec3 n=normalize(vec3(
             map(pos+vec3(0.01,0,0))-map(pos-vec3(0.01,0,0)),
             map(pos+vec3(0,0.01,0))-map(pos-vec3(0,0.01,0)),
@@ -1201,7 +1213,7 @@ body.custom-cursor, body.custom-cursor a, body.custom-cursor button, body.custom
           float diff=max(dot(n,lightDir),0.0);
           float fres=pow(1.0-max(dot(n,-rd),0.0),3.0);
           col=mix(amberDim*0.4, amber, diff*0.7+fres*0.6);
-          alpha=1.0;
+          alpha=cov;
         }
         col += vec3(1.0,0.8,0.55) * fragGlow;
         col+=amber*glow*0.5;
@@ -1229,12 +1241,21 @@ body.custom-cursor, body.custom-cursor a, body.custom-cursor button, body.custom
 
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const clock = new THREE.Clock();
+  let heroVisible = true, heroRaf = 0;
   function animate(){
-    if(!prefersReducedMotion) requestAnimationFrame(animate);
+    heroRaf = 0;
     uniforms.uTime.value = clock.getElapsedTime();
     renderer.render(scene, camera);
+    if(!prefersReducedMotion && heroVisible) heroRaf = requestAnimationFrame(animate);
   }
   animate();
+  // Stop burning GPU on the raymarcher once the hero is scrolled out of view.
+  if(!prefersReducedMotion && 'IntersectionObserver' in window){
+    new IntersectionObserver(es => {
+      heroVisible = es[0].isIntersecting;
+      if(heroVisible && !heroRaf) heroRaf = requestAnimationFrame(animate);
+    }).observe(heroEl);
+  }
 })();
 </script>
 <script>
@@ -1292,9 +1313,17 @@ body.custom-cursor, body.custom-cursor a, body.custom-cursor button, body.custom
       ctx.fillStyle = 'rgba(232,137,74,0.4)';
       ctx.fill();
     });
-    if(!prefersReducedMotion) requestAnimationFrame(frame);
+    dotsRaf = 0;
+    if(!prefersReducedMotion && dotsVisible) dotsRaf = requestAnimationFrame(frame);
   }
+  let dotsVisible = true, dotsRaf = 0;
   frame();
+  if(!prefersReducedMotion && 'IntersectionObserver' in window){
+    new IntersectionObserver(es => {
+      dotsVisible = es[0].isIntersecting;
+      if(dotsVisible && !dotsRaf) dotsRaf = requestAnimationFrame(frame);
+    }).observe(heroEl);
+  }
 })();
 </script>
 <script>
